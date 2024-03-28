@@ -1,0 +1,10 @@
+spring:
+  application:
+    name: mq-tutorials
+  rabbitmq:
+    username: buddy
+    password: pass1234
+
+logging:
+  level:
+    org: ERROR
