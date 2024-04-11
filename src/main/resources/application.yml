@@ -4,6 +4,14 @@ spring:
   rabbitmq:
     username: buddy
     password: pass1234
+    virtual-host: chat
+    port: 5672
+    listener:
+      simple:
+        concurrency: 5
+        max-concurrency: 10
+        prefetch: 5
+        default-requeue-rejected: false
 
 logging:
   level:
