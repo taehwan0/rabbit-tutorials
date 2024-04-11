@@ -6,6 +6,7 @@ import com.example.mqtutorials.controller.dto.request.UserPathRequest;
 import com.example.mqtutorials.controller.dto.request.VhostPathRequest;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -50,16 +51,46 @@ public class RabbitAuthController {
     public String postResource(ResourcePathRequest request) {
         log.info("rabbit auth vhost info: {}", request);
 
-        if ("buddy".equals(request.getUsername()) && "chat".equals(request.getVhost())) {
+        // vhost_chat 으로의 접근만 허용
+        if ("chat".equals(request.getVhost())) {
+            // exchange 허용 케이스
+            // exchange "request" 에 대해서 허용
             if ("exchange".equals(request.getResource()) && "request".equals(request.getName())) {
-                List<String> exchangeAllowPermissions = Arrays.asList("configure", "write");
+                // 허용하는 permission은 publish뿐
+                List<String> exchangeAllowPermissions = Arrays.asList("write");
 
                 boolean allow = exchangeAllowPermissions
                                         .stream()
                                         .anyMatch(request.getPermission()::equals);
 
+                // 보내기라면 허용함
                 if (allow) {
                     return "allow";
+                }
+            }
+
+            // queue 허용 케이스
+            if ("queue".equals(request.getResource())) {
+                String username = request.getUsername();
+                // 허용하는 패턴은 user.[username]
+                Pattern queueNamePattern = Pattern.compile("user." + username);
+                Matcher matcher = queueNamePattern.matcher(request.getName());
+
+                if (matcher.find()) {
+                    // 패턴에 맞는다면 큐 생성 허가
+                    if ("configure".equals(request.getPermission())) {
+                        return "allow";
+                    }
+
+                    // 패턴에 맞는다면 queue binding 허가
+                    if ("write".equals(request.getPermission())) {
+                        return "allow";
+                    }
+
+                    // 패턴에 맞는다면 consume 허가
+                    if ("read".equals(request.getPermission())) {
+                        return "allow";
+                    }
                 }
             }
         }
@@ -72,6 +103,12 @@ public class RabbitAuthController {
 
         Pattern pattern = Pattern.compile("(^(chat|command)\\.\\w+)");
 
+//        if ("write".equals(request.getPermission())) {
+//            if (("chat.user." + username).equals(request.getRoutingKey())) {
+//                return "allow";
+//            }
+//        }
+//
         if ("buddy".equals(request.getUsername())
                     && "chat".equals(request.getVhost())
                     && "topic".equals(request.getResource())
