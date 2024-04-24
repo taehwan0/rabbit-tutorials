@@ -9,10 +9,8 @@ import org.springframework.amqp.rabbit.config.SimpleRabbitListenerContainerFacto
 import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 import org.springframework.amqp.rabbit.core.RabbitAdmin;
 import org.springframework.amqp.rabbit.core.RabbitTemplate;
-import org.springframework.amqp.support.converter.ContentTypeDelegatingMessageConverter;
 import org.springframework.amqp.support.converter.Jackson2JsonMessageConverter;
 import org.springframework.amqp.support.converter.MessageConverter;
-import org.springframework.amqp.support.converter.SimpleMessageConverter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -25,21 +23,15 @@ public class RabbitConfig {
     }
 
     @Bean
-    public MessageConverter messageConverter() {
-        ContentTypeDelegatingMessageConverter converter = new ContentTypeDelegatingMessageConverter(new Jackson2JsonMessageConverter());
-
-        SimpleMessageConverter simpleMessageConverter = new SimpleMessageConverter();
-        converter.addDelegate("text/plain", simpleMessageConverter);
-        converter.addDelegate(null, simpleMessageConverter);
-
-        return converter;
+    public Jackson2JsonMessageConverter jackson2JsonMessageConverter() {
+        return new Jackson2JsonMessageConverter();
     }
 
     @Bean
-    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory, MessageConverter messageConverter) {
+    public SimpleRabbitListenerContainerFactory rabbitListenerContainerFactory(ConnectionFactory connectionFactory) {
         SimpleRabbitListenerContainerFactory factory = new SimpleRabbitListenerContainerFactory();
         factory.setConnectionFactory(connectionFactory);
-        factory.setMessageConverter(messageConverter);
+        factory.setMessageConverter(jackson2JsonMessageConverter());
         factory.setPrefetchCount(3);
         factory.setConcurrentConsumers(3);
         factory.setMaxConcurrentConsumers(3);
