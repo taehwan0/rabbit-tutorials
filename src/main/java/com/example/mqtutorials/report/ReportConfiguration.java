@@ -12,22 +12,22 @@ public class ReportConfiguration {
 
     @Bean
     public TopicExchange topicExchange() {
-        return new TopicExchange("topic-exchange");
+        return new TopicExchange("topic");
     }
 
     @Bean
     public TopicExchange chatExchange() {
-        return new TopicExchange("chat-exchange");
+        return new TopicExchange("chat");
     }
 
     @Bean
     public TopicExchange userExchange() {
-        return new TopicExchange("user-exchange");
+        return new TopicExchange("user");
     }
 
     @Bean
     public TopicExchange roomExchange() {
-        return new TopicExchange("room-exchange");
+        return new TopicExchange("room");
     }
 
     @Bean
