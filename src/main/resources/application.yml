@@ -2,9 +2,9 @@ spring:
   application:
     name: mq-tutorials
   rabbitmq:
-    username: buddy
-    password: pass1234
-    virtual-host: chat
+    username: user
+    password: Asdf1234$
+    virtual-host: /
     port: 5672
     listener:
       simple:
